@@ -11,11 +11,13 @@ RugplayLite is a **lightweight view-only version** of **[FaceDev's Rugplay](http
 # Development Setup 🧑‍💻
 ## Prerequisites
 1. **Ensure that you have node.js and npm installed**
+2. **Ensure that Python and pip is installed**
 
 ## Setup
 1. **Clone the repository using Git ```git clone https://github.com/ingStudiosOfficial/rugplaylite.git```**
 2. **Modify the .env file in the root directory to include your [Rugplay API key](https://rugplay.com/api) and your development localhost port**
 3. **Run ```npm install``` to install all the dependencies**
+4. **Run ```pip install plotly``` to install Plotly**
 
 ## Running the Project
 1. **In your terminal, change the directory from the root to the server directory by running ```cd server```**
