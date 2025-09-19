@@ -1,0 +1,334 @@
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+#coin-header-div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--background-color);
+    padding: 10px;
+    border-radius: 25px;
+    height: 100px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    gap: 10px;
+    width: 90%;
+}
+
+.coin-icon-img {
+    overflow: hidden;
+    border-radius: 50%;
+    aspect-ratio: 1 / 1;
+    height: 100%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    object-fit: cover;
+}
+
+.coin-icon-div {
+    overflow: hidden;
+    border-radius: 50%;
+    aspect-ratio: 1 / 1;
+    height: 100%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    background-color: var(--primary-color);
+    color: #ffffff;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.header-left-anchor {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 100%;
+}
+
+.coin-name-symbol-anchor {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    height: 100%;
+    justify-content: space-between;
+}
+
+.coin-symbol {
+    padding: 10px;
+    margin: 0;
+    border-radius: 25px;
+    background-color: var(--light-background-color);
+}
+
+.coin-name,
+.coin-price {
+    margin: 0;
+}
+
+.coin-change {
+    background-color: #000000;
+    color: #ffffff;
+    padding: 5px;
+    border-radius: 25px;
+    width: fit-content;
+}
+
+.header-right-anchor {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    height: 100%;
+}
+
+#coin-body-div {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: 1fr;
+    background-color: var(--background-color);
+    padding: 10px;
+    border-radius: 25px;
+    height: 400px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    gap: 10px;
+    width: 90%;
+}
+
+.coin-graph-container {
+    width: 95%;
+    height: 95%;
+    border-radius: 25px;
+    background-color: var(--light-background-color);
+    align-self: center;
+    justify-self: center;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.coin-graph-container.hidden {
+    opacity: 0;
+}
+
+.body-right-anchor {
+    display: grid;
+    grid-template-rows: 1fr 2fr;
+    grid-template-columns: auto;
+    width: 95%;
+    height: 95%;
+    align-self: center;
+    justify-self: center;
+}
+
+.trade-div {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+    width: 95%;
+    height: 95%;
+    border-radius: 25px;
+    background-color: var(--light-background-color);
+    align-self: center;
+    justify-self: center;
+}
+
+.creator-div {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    grid-template-columns: auto;
+    width: 95%;
+    height: 95%;
+    border-radius: 25px;
+    background-color: var(--light-background-color);
+    align-self: center;
+    justify-self: center;
+}
+
+.buy-button {
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    justify-self: center;
+    gap: 10px;
+    width: 80%;
+    height: 80%;
+    background-color: var(--primary-color);
+    color: var(--light-background-color);
+    border-radius: 25px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease;
+    outline: none;
+    border: none;
+}
+
+.sell-button {
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    justify-self: center;
+    gap: 10px;
+    width: 80%;
+    height: 80%;
+    background-color: var(--light-background-color);
+    color: var(--primary-color);
+    border-radius: 25px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease;
+    outline: none;
+    border: none;
+}
+
+.buy-button:hover,
+.sell-button:hover {
+    transform: translateY(2px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0);
+}
+
+#buy-span {
+    color: #ffffff;
+}
+
+#sell-span {
+    color: var(--primary-color);
+}
+
+.creator-top-anchor {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    width: 95%;
+    gap: 10px;
+    padding: 10px;
+    align-self: center;
+    justify-self: center
+}
+
+.username-bio-anchor {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    overflow-wrap: break-word; 
+}
+
+.creator-bio {
+    color: var(--text-secondary);
+    font-size: 10px;
+}
+
+.creator-avatar-img {
+    border-radius: 25px;
+    aspect-ratio: 1 / 1;
+    height: 100px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    object-fit: cover;
+}
+
+.creator-username {
+    margin: 0;
+    cursor: pointer;
+}
+
+.rugpull-chance-div {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    width: 95%;
+    padding: 10px;
+    align-self: center;
+    justify-self: center;
+}
+
+.rugpull-chance-h2 {
+    margin: 0;
+    font-size: 60px;
+}
+
+.rugpull-chance-text {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+#more-info-div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    width: 90%;
+    height: 50px;
+    background-color: var(--background-color);
+    border-radius: 25px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+#info-inner-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1 / 1;
+    height: 100%;
+    background-color: var(--light-background-color);
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease;
+    cursor: pointer;
+    outline: none;
+    border: none;
+}
+
+#info-inner-button:hover {
+    transform: translateY(2px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0);
+}
+
+#info-button {
+    color: var(--primary-color);
+}
+
+.more-info-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 75%;
+    height: 75%;
+    background-color: var(--light-background-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    border-radius: 25px;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    padding: 10px;
+    overflow-y: scroll;
+}
+
+.more-info-panel.fade-in {
+    opacity: 1;
+}
+
+#more-info-overlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    transition: background-color 0.3s ease-in-out;
+}
+
+#more-info-overlay.grey-out {
+    background-color: rgba(0, 0, 0, 0.5);
+    pointer-events: all;
+}
