@@ -1,5 +1,5 @@
 # RugplayLite - A Lightweight Version of Rugplay 💲
-RugplayLite is a **lightweight view-only version** of **[FaceDev's Rugplay](https://github.com/outpoot/rugplay)**. RugplayLite allows you to view all coin data **without the long loading times** with **faster speeds**. You can even run Rugplay Lite **locally** (check the **Development Setup** instructions below)! View coins, search for coins, and view all time coin data faster than ever with **RugplayLite**! Know your risks with the **rugpull chance** feature!
+RugplayLite is a **lightweight view-only version** of **[FaceDev's Rugplay](https://github.com/outpoot/rugplay)**. RugplayLite allows you to view all coin data **without the long loading times** with **faster speeds**. You can even run Rugplay Lite **locally** (check the **Development Setup** instructions below)! View coins, search for coins, and view all time coin data **faster than ever** with RugplayLite! Know your risks with the **rugpull chance** feature!
 
 # Features ⭐
 1. **View the top coins**
