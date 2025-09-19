@@ -13,7 +13,7 @@ RugplayLite is a **lightweight view-only version** of **[FaceDev's Rugplay](http
 1. **Ensure that you have node.js and npm installed**
 
 ## Setup
-1. **Clone the repository using Git ```git clone [https://github.com/ingStudiosOfficial/rugplaylite.git](https://github.com/ingStudiosOfficial/rugplaylite.git)```**
+1. **Clone the repository using Git ```git clone https://github.com/ingStudiosOfficial/rugplaylite.git```**
 2. **Modify the .env file in the root directory to include your [Rugplay API key](https://rugplay.com/api) and your development localhost port**
 3. **Run ```npm install``` to install all the dependencies**
 
