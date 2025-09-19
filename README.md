@@ -11,7 +11,7 @@ RugplayLite is a **lightweight view-only version** of **[FaceDev's Rugplay](http
 # Development Setup 🧑‍💻
 ## Prerequisites
 1. **Ensure that you have node.js and npm installed**
-2. **Ensure that Python and pip is installed**
+2. **Ensure that Python and pip are installed**
 
 ## Setup
 1. **Clone the repository using Git ```git clone https://github.com/ingStudiosOfficial/rugplaylite.git```**
