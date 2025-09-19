@@ -22,7 +22,7 @@ RugplayLite is a **lightweight view-only version** of **[FaceDev's Rugplay](http
 2. **Run the project by executing ```node server.js```**
 
 ## Development
-Feel free to make modifications to the code, but remember to give credits with the [link](https://github.com/ingStudiosOfficial/rugplaylite) to this repository!
+Feel free to make modifications to the code, but remember to give credits with the **[link](https://github.com/ingStudiosOfficial/rugplaylite)** to this repository!
 
 # Gallery 🖼️
 <img width="1920" height="1128" alt="Screenshot 2025-09-19 215814" src="https://github.com/user-attachments/assets/4780db93-f0db-4a18-84a0-beec882e112d" />
