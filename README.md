@@ -22,6 +22,7 @@ RugplayLite is a **lightweight view-only version** of **[FaceDev's Rugplay](http
 ## Running the Project
 1. **In your terminal, change the directory from the root to the server directory by running ```cd server```**
 2. **Run the project by executing ```node server.js```**
+3. **When prompted for API key, enter ```devlocal``` in the prompt if your are running locally with your API key stored in the .env storage**
 
 ## Development
 Feel free to make modifications to the code, but remember to give credits with the **[link](https://github.com/ingStudiosOfficial/rugplaylite)** to this repository!
