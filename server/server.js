@@ -200,6 +200,7 @@ if (runMode === 'local') {
     console.log('Running deployed methods.');
     app.get('/api/top-coins', async (req, res) => {
         try {
+            console.log('API key from request query:', req.query.apikey);
             const response = await fetch('https://rugplay.com/api/v1/top', {
                 method: 'GET',
                 headers: {
