@@ -4,7 +4,10 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 const path = require('path');
 const { spawn } = require('child_process');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
+
+// Puppeteer
 const puppeteer = require('puppeteer');
+console.log('Chromium path:', puppeteer.executablePath());
 
 const app = express();
 
@@ -40,33 +43,18 @@ app.use('/search', express.static(path.join(__dirname, '../public/search')));
 app.use('/assets', express.static(path.join(__dirname, '../public/assets')));
 app.use('/global', express.static(path.join(__dirname, '../public/global')));
 
-async function fetchWithPuppeteer(url, apiKey) {
+async function fetchWithPuppeteer(url) {
     const browser = await puppeteer.launch({
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
+
     const page = await browser.newPage();
-
-    await page.setExtraHTTPHeaders({
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-    });
-
     await page.goto(url, { waitUntil: 'networkidle2' });
 
-    // Grab the JSON content
-    const content = await page.evaluate(() => {
-        return document.querySelector('pre')?.innerText || document.body.innerText;
-    });
-
+    const content = await page.content();
     await browser.close();
-
-    try {
-        return JSON.parse(content);
-    } catch (err) {
-        console.error('Failed to parse JSON:', content);
-        throw new Error('Failed to parse API response');
-    }
+    return content;
 }
 
 if (runMode === 'local') {
