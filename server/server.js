@@ -28,6 +28,10 @@ app.use(express.json({ limit: '50mb' }));
 
 console.log('Run mode:', runMode);
 
+app.get('/', (req, res) => {
+    res.redirect('/homepage/homepage.html');
+});
+
 if (runMode === 'local') {
     console.log('Running local methods.');
     app.get('/api/top-coins', async (req, res) => {
