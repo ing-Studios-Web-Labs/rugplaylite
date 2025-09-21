@@ -29,6 +29,7 @@ Feel free to make modifications to the code, but remember to give credits with t
 
 ## Run Mode Optioms
 **Local:** Add your API key to your .env file if running locally and enter devlocal when prompted for your API key on the client side
+
 **Deployed:** Remove your API key from your .env file and enter your API key when prompted on the client side
 
 # Gallery 🖼️
