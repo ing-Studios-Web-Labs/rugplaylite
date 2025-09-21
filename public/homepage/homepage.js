@@ -89,7 +89,7 @@ function handleCoinClick() {
             console.log('ID of coin item clicked on:', clickedItem.id);
             const coinSymbol = clickedItem.dataset.symbol;
             console.log('Symbol of clicked coin:', coinSymbol);
-            document.location.href = `../coinpage/coinpage.html?symbol=${coinSymbol}`;
+            document.location.href = `/coinpage/coinpage.html?symbol=${coinSymbol}`;
         }
     });
 }

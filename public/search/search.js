@@ -1,8 +1,8 @@
-import { redirectToHomepage } from "../global/homepageRedirect.js";
-import { redirectToSearch } from "../global/searchbar.js";
-import { colorCoinChange } from "../global/coinColorChange.js";
-import { checkForAPIKey } from "../global/checkForApiKey.js";
-import { fetchAPIKey } from "../global/checkForApiKey.js";
+import { redirectToHomepage } from "/global/homepageRedirect.js";
+import { redirectToSearch } from "/global/searchbar.js";
+import { colorCoinChange } from "/global/coinColorChange.js";
+import { checkForAPIKey } from "/global/checkForApiKey.js";
+import { fetchAPIKey } from "/global/checkForApiKey.js";
 
 let searchedCoin;
 let currentPage;
@@ -240,7 +240,7 @@ function handleCoinClick() {
             console.log('ID of coin item clicked on:', clickedItem.id);
             const coinSymbol = clickedItem.dataset.symbol;
             console.log('Symbol of clicked coin:', coinSymbol);
-            document.location.href = `../coinpage/coinpage.html?symbol=${coinSymbol}`;
+            document.location.href = `/coinpage/coinpage.html?symbol=${coinSymbol}`;
         }
     });
 }
