@@ -1,10 +1,10 @@
-import puppeteer from 'puppeteer';
 const express = require('express');
 const cors = require('cors');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const path = require('path');
 const { spawn } = require('child_process');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
+const puppeteer = require('puppeteer');
 
 const app = express();
 
