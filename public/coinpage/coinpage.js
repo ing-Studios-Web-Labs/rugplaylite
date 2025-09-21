@@ -1,9 +1,9 @@
-import { redirectToHomepage } from "../global/homepageRedirect.js";
-import { redirectToSearch } from "../global/searchbar.js";
-import { colorCoinChange } from "../global/coinColorChange.js";
-import { calculateRugpullChance } from "../global/calculateRugpull.js";
-import { checkForAPIKey } from "../global/checkForApiKey.js";
-import { fetchAPIKey } from "../global/checkForApiKey.js";
+import { redirectToHomepage } from "/global/homepageRedirect.js";
+import { redirectToSearch } from "/global/searchbar.js";
+import { colorCoinChange } from "/global/coinColorChange.js";
+import { calculateRugpullChance } from "/global/calculateRugpull.js";
+import { checkForAPIKey } from "/global/checkForApiKey.js";
+import { fetchAPIKey } from "/global/checkForApiKey.js";
 
 let coinData;
 let topHolders;
