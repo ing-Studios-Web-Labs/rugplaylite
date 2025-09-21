@@ -15,7 +15,7 @@ RugplayLite is a **lightweight view-only version** of **[FaceDev's Rugplay](http
 
 ## Setup
 1. **Clone the repository using Git ```git clone https://github.com/ingStudiosOfficial/rugplaylite.git```**
-2. **Modify the .env file in the root directory to include your [Rugplay API key](https://rugplay.com/api) and your development localhost port**
+2. **Modify the .env file in the root directory to include your [Rugplay API key](https://rugplay.com/api), your development localhost port, and your run mode (check Run Mode Options)**
 3. **Run ```npm install``` to install all the dependencies**
 4. **Run ```pip install plotly``` to install Plotly**
 
@@ -26,6 +26,10 @@ RugplayLite is a **lightweight view-only version** of **[FaceDev's Rugplay](http
 
 ## Development
 Feel free to make modifications to the code, but remember to give credits with the **[link](https://github.com/ingStudiosOfficial/rugplaylite)** to this repository!
+
+## Run Mode Optioms
+**Local:** Add your API key to your .env file if running locally and enter devlocal when prompted for your API key on the client side
+**Deployed:** Remove your API key from your .env file and enter your API key when prompted on the client side
 
 # Gallery 🖼️
 <img width="1920" height="1128" alt="Screenshot 2025-09-19 215814" src="https://github.com/user-attachments/assets/4780db93-f0db-4a18-84a0-beec882e112d" />
