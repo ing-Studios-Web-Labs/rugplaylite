@@ -24,6 +24,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.static(path.join(__dirname, '../public')));
+console.log('Serving static files from:', path.join(__dirname, '../public'));
 app.use(express.json({ limit: '50mb' }));
 
 console.log('Run mode:', runMode);
@@ -31,6 +32,12 @@ console.log('Run mode:', runMode);
 app.get('/', (req, res) => {
     res.redirect('/homepage/homepage.html');
 });
+
+app.use('/homepage', express.static(path.join(__dirname, '../public/homepage')));
+app.use('/coinpage', express.static(path.join(__dirname, '../public/coinpage')));
+app.use('/search', express.static(path.join(__dirname, '../public/search')));
+app.use('/assets', express.static(path.join(__dirname, '../public/assets')));
+app.use('/global', express.static(path.join(__dirname, '../public/global')));
 
 if (runMode === 'local') {
     console.log('Running local methods.');
