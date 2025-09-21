@@ -1,11 +1,19 @@
 import { redirectToHomepage } from "../global/homepageRedirect.js";
 import { redirectToSearch } from "../global/searchbar.js";
 import { colorCoinChange } from "../global/coinColorChange.js";
+import { checkForAPIKey } from "../global/checkForApiKey.js";
+import { fetchAPIKey } from "../global/checkForApiKey.js";
 
 async function fetchTopCoins() {
     try {
         console.log('Fetching top coins...');
-        const response = await fetch('/api/top-coins');
+
+        const finalParams = {'apikey': fetchAPIKey()};
+        // Construct the query string
+        const queryString = new URLSearchParams(finalParams).toString();
+        const apiUrl = `/api/top-coins?${queryString}`; // The API endpoint URL
+
+        const response = await fetch(apiUrl);
 
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -88,6 +96,7 @@ function handleCoinClick() {
 
 async function initializePage() {
     console.log('Initializing page...');
+    checkForAPIKey();
     await displayTopCoins();
     handleCoinClick();
     redirectToSearch('searchbar');

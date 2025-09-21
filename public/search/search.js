@@ -1,6 +1,8 @@
 import { redirectToHomepage } from "../global/homepageRedirect.js";
 import { redirectToSearch } from "../global/searchbar.js";
 import { colorCoinChange } from "../global/coinColorChange.js";
+import { checkForAPIKey } from "../global/checkForApiKey.js";
+import { fetchAPIKey } from "../global/checkForApiKey.js";
 
 let searchedCoin;
 let currentPage;
@@ -37,7 +39,8 @@ async function retrieveSearchResults() {
         priceFilter: 'all',
         changeFilter: 'all',
         page: 1,
-        limit: 12
+        limit: 12,
+        apikey: fetchAPIKey()
     };
     
     const urlParams = retrieveSearchParams();
@@ -243,6 +246,7 @@ function handleCoinClick() {
 }
 
 async function initializePage() {
+    checkForAPIKey();
     checkForEmptyParams();
     await displaySearchResults();
     handleCoinClick();

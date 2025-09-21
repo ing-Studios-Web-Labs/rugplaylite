@@ -2,6 +2,8 @@ import { redirectToHomepage } from "../global/homepageRedirect.js";
 import { redirectToSearch } from "../global/searchbar.js";
 import { colorCoinChange } from "../global/coinColorChange.js";
 import { calculateRugpullChance } from "../global/calculateRugpull.js";
+import { checkForAPIKey } from "../global/checkForApiKey.js";
+import { fetchAPIKey } from "../global/checkForApiKey.js";
 
 let coinData;
 let topHolders;
@@ -23,7 +25,8 @@ function retrieveCoinParams() {
 async function retrieveCoinData() {
     const defaultParams = {
         symbol: '',
-        timeframe: '1m'
+        timeframe: '1m',
+        apikey: fetchAPIKey()
     };
     
     const urlParams = retrieveCoinParams();
@@ -73,7 +76,7 @@ async function retrieveCoinData() {
 }
 
 async function retrieveTopHolders() {
-const finalParams = {'symbol': coinData.coin.symbol, 'limit': 50};
+    const finalParams = {'symbol': coinData.coin.symbol, 'limit': 50, 'apikey': fetchAPIKey()};
     const queryString = new URLSearchParams(finalParams).toString();
     const apiUrl = `/api/coin-holders?${queryString}`;
     console.log('API URL to fetch coin holders:', apiUrl);
@@ -335,6 +338,7 @@ function displayMoreInfoPanel() {
         const moreInfoPanel = document.createElement('div');
         moreInfoPanel.classList.add('more-info-panel');
 
+        // The HTML for the info panel
         moreInfoPanel.innerHTML = `
         <h2>${coinData.coin.name} (*${coinData.coin.symbol})</h2>
         <h3>General Information</h3>
@@ -360,6 +364,7 @@ function displayMoreInfoPanel() {
         `;
 
         moreInfoOverlay.appendChild(moreInfoPanel);
+        // Declare that the panel is opened
         currentPanel = moreInfoPanel;
         
         setTimeout(() => {
@@ -465,6 +470,7 @@ async function fetchAndRenderGraph(data) {
 }
 
 async function initializePage() {
+    checkForAPIKey();
     coinData = await retrieveCoinData();
     topHolders = await retrieveTopHolders();
     displayCoinHeader();
