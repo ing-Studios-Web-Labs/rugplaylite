@@ -220,7 +220,8 @@ if (runMode === 'local') {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${req.query.apikey}`,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
                 },
             });
 
@@ -266,7 +267,8 @@ if (runMode === 'local') {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${req.query.apikey}`,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
                 },
             });
 
@@ -306,7 +308,8 @@ if (runMode === 'local') {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${req.query.apikey}`,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
                 },
             });
 
@@ -346,7 +349,8 @@ if (runMode === 'local') {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${req.query.apikey}`,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
                 },
             });
 
