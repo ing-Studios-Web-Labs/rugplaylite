@@ -5,10 +5,6 @@ const path = require('path');
 const { spawn } = require('child_process');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
-// Puppeteer
-const puppeteer = require('puppeteer');
-console.log('Chromium path:', puppeteer.executablePath());
-
 const app = express();
 
 // Get run mode from env file
@@ -43,18 +39,19 @@ app.use('/search', express.static(path.join(__dirname, '../public/search')));
 app.use('/assets', express.static(path.join(__dirname, '../public/assets')));
 app.use('/global', express.static(path.join(__dirname, '../public/global')));
 
-async function fetchWithPuppeteer(url) {
-    const browser = await puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
+async function fetchWithHeaders(url, apiKey) {
+    const headers = {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json, text/plain, */*',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Connection': 'keep-alive',
+        'Referer': 'https://rugplay.com/'
+    };
 
-    const page = await browser.newPage();
-    await page.goto(url, { waitUntil: 'networkidle2' });
-
-    const content = await page.content();
-    await browser.close();
-    return content;
+    const res = await fetch(url, { method: 'GET', headers, timeout: 15000 });
+    return res;
 }
 
 if (runMode === 'local') {
@@ -216,20 +213,37 @@ if (runMode === 'local') {
     });
 } else {
     console.log('Running deployed methods.');
-    // ---- /api/top-coins ----
     app.get('/api/top-coins', async (req, res) => {
         try {
             console.log('API key from request query:', req.query.apikey);
-            const data = await fetchWithPuppeteer('https://rugplay.com/api/v1/top', req.query.apikey);
+            const response = await fetch('https://rugplay.com/api/v1/top', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${req.query.apikey}`,
+                    'Content-Type': 'application/json'
+                },
+            });
+
+            console.log('External API response status:', response.status);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('API Error:', errorText);
+                return res.status(response.status).json({ 
+                    error: 'Failed to fetch data from external API.',
+                    details: errorText 
+                });
+            }
+
+            const data = await response.json();
             console.log('Successfully fetched data:', data);
             res.json(data);
         } catch (error) {
-            console.error('Error fetching top coins:', error);
-            res.status(500).json({ error: 'Internal server error' });
+            console.error('Error fetching data:', error);
+            res.status(500).json({ error: 'Internal server error.' });
         }
     });
 
-    // ---- /api/market-data ----
     app.get('/api/market-data', async (req, res) => {
         try {
             const params = {
@@ -241,54 +255,118 @@ if (runMode === 'local') {
                 page: parseInt(req.query.page) || 1,
                 limit: parseInt(req.query.limit) || 12
             };
-            const url = new URL('https://rugplay.com/api/v1/market');
-            url.search = new URLSearchParams(params).toString();
 
+            const url = new URL('https://rugplay.com/api/v1/market');
+
+            url.search = new URLSearchParams(params).toString();
+            
             console.log('Fetching from URL:', url.toString());
-            const data = await fetchWithPuppeteer(url.toString(), req.query.apikey);
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${req.query.apikey}`,
+                    'Content-Type': 'application/json'
+                },
+            });
+
+            console.log('External API response status:', response.status);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('API Error:', errorText);
+                return res.status(response.status).json({ 
+                    error: 'Failed to fetch data from external API.',
+                    details: errorText 
+                });
+            }
+
+            const data = await response.json();
             console.log('Successfully fetched data:', data);
             res.json(data);
         } catch (error) {
-            console.error('Error fetching market data:', error);
-            res.status(500).json({ error: 'Internal server error' });
+            console.error('Error fetching data:', error);
+            res.status(500).json({ error: 'Internal server error.' });
         }
     });
 
-    // ---- /api/coin-info ----
     app.get('/api/coin-info', async (req, res) => {
         try {
             const params = {
                 timeframe: req.query.timeframe || '1m'
             };
-            const url = new URL(`https://rugplay.com/api/v1/coin/${req.query.symbol}`);
-            url.search = new URLSearchParams(params).toString();
 
+            const url = new URL(`https://rugplay.com/api/v1/coin/${req.query.symbol}`);
+
+            url.search = new URLSearchParams(params).toString();
+            
             console.log('Fetching from URL:', url.toString());
-            const data = await fetchWithPuppeteer(url.toString(), req.query.apikey);
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${req.query.apikey}`,
+                    'Content-Type': 'application/json'
+                },
+            });
+
+            console.log('External API response status:', response.status);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('API Error:', errorText);
+                return res.status(response.status).json({ 
+                    error: 'Failed to fetch data from external API.',
+                    details: errorText 
+                });
+            }
+
+            const data = await response.json();
             console.log('Successfully fetched data:', data);
             res.json(data);
         } catch (error) {
-            console.error('Error fetching coin info:', error);
-            res.status(500).json({ error: 'Internal server error' });
+            console.error('Error fetching data:', error);
+            res.status(500).json({ error: 'Internal server error.' });
         }
     });
 
-    // ---- /api/coin-holders ----
     app.get('/api/coin-holders', async (req, res) => {
         try {
             const params = {
                 limit: req.query.limit || 50
             };
-            const url = new URL(`https://rugplay.com/api/v1/holders/${req.query.symbol}`);
-            url.search = new URLSearchParams(params).toString();
 
+            const url = new URL(`https://rugplay.com/api/v1/holders/${req.query.symbol}`);
+
+            url.search = new URLSearchParams(params).toString();
+            
             console.log('Fetching from URL:', url.toString());
-            const data = await fetchWithPuppeteer(url.toString(), req.query.apikey);
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${req.query.apikey}`,
+                    'Content-Type': 'application/json'
+                },
+            });
+
+            console.log('External API response status:', response.status);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('API Error:', errorText);
+                return res.status(response.status).json({ 
+                    error: 'Failed to fetch data from external API.',
+                    details: errorText 
+                });
+            }
+
+            const data = await response.json();
             console.log('Successfully fetched data:', data);
             res.json(data);
         } catch (error) {
-            console.error('Error fetching coin holders:', error);
-            res.status(500).json({ error: 'Internal server error' });
+            console.error('Error fetching data:', error);
+            res.status(500).json({ error: 'Internal server error.' });
         }
     });
 }
