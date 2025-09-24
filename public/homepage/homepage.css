@@ -17,6 +17,52 @@ main {
     justify-self: center;
 }
 
+.homepage-container-header {
+    text-align: center;
+}
+
+.download-bar {
+    background-color: var(--light-background-color);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 500px;
+    height: 25px;
+    padding: 10px;
+    border-radius: 25px;
+}
+
+.download-fill {
+    height: 100%;
+    border-radius: 25px;
+    background-color: var(--primary-color);
+    transition: width 0.3s ease-in-out;
+    border-radius: 25px;
+}
+
+.summarize-button {
+    /* Two gradients combined into one background */
+    background: linear-gradient(90deg, 
+        rgba(25, 118, 210, 1) 0%, rgba(255, 7, 143, 1) 50%,
+        rgba(25, 118, 210, 1) 100%);
+    
+    /* Initial background position and size */
+    background-size: 200% 100%;
+    background-position: 0% 0%;
+    
+    /* Apply the transition to background-position */
+    transition: background-position 0.3s ease-in-out, box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.summarize-button:focus {
+    background-position: 100% 0%;
+    outline: auto;
+}
+
+.summarize-button:hover {
+    background-position: 100% 0%;
+}
+
 #top-coins-container {
     display: flex;
     flex-direction: column;
@@ -46,7 +92,7 @@ main {
     align-self: center;
     justify-self: center;
     margin: 5px;
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
 
 .top-coin-info:focus {
@@ -98,4 +144,43 @@ main {
     padding: 5px;
     border-radius: 25px;
     width: fit-content;
+}
+
+.disclaimer-text {
+    color: #808080;
+    font-size: 10px;
+    text-align: center;
+}
+
+.loader {
+    width: 50px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 8px solid var(--primary-color);
+    animation:
+        l20-1 0.8s infinite linear alternate,
+        l20-2 1.6s infinite linear;
+}
+
+@keyframes l20-1{
+    0%    {clip-path: polygon(50% 50%,0       0,  50%   0%,  50%    0%, 50%    0%, 50%    0%, 50%    0% )}
+    12.5% {clip-path: polygon(50% 50%,0       0,  50%   0%,  100%   0%, 100%   0%, 100%   0%, 100%   0% )}
+    25%   {clip-path: polygon(50% 50%,0       0,  50%   0%,  100%   0%, 100% 100%, 100% 100%, 100% 100% )}
+    50%   {clip-path: polygon(50% 50%,0       0,  50%   0%,  100%   0%, 100% 100%, 50%  100%, 0%   100% )}
+    62.5% {clip-path: polygon(50% 50%,100%    0, 100%   0%,  100%   0%, 100% 100%, 50%  100%, 0%   100% )}
+    75%   {clip-path: polygon(50% 50%,100% 100%, 100% 100%,  100% 100%, 100% 100%, 50%  100%, 0%   100% )}
+    100%  {clip-path: polygon(50% 50%,50%  100%,  50% 100%,   50% 100%,  50% 100%, 50%  100%, 0%   100% )}
+}
+
+@keyframes l20-2{ 
+    0%    {transform:scaleY(1)  rotate(0deg)}
+    49.99%{transform:scaleY(1)  rotate(135deg)}
+    50%   {transform:scaleY(-1) rotate(0deg)}
+    100%  {transform:scaleY(-1) rotate(-135deg)}
+}
+
+#ai-market-summary {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }

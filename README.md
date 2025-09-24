@@ -7,6 +7,7 @@ RugplayLite is a **lightweight view-only version** of **[FaceDev's Rugplay](http
 3. **View the coin data with a line graph**
 4. **Includes the chance of the creator rugpulling (algorithm)**
 5. **Fast and snappy**
+6. **On-device AI market summary**
 
 # Development Setup 🧑‍💻
 ## Prerequisites
@@ -16,8 +17,8 @@ RugplayLite is a **lightweight view-only version** of **[FaceDev's Rugplay](http
 ## Setup
 1. **Clone the repository using Git ```git clone https://github.com/ingStudiosOfficial/rugplaylite.git```**
 2. **Modify the .env file in the root directory to include your [Rugplay API key](https://rugplay.com/api), your development localhost port, and your run mode (check Run Mode Options)**
-3. **Run ```npm install``` to install all the dependencies**
-4. **Run ```pip install plotly``` to install Plotly**
+3. **Run ```npm install``` to install all the node.js dependencies**
+4. **Run ```pip install -r requirements.txt``` to install all the Python dependencies**
 
 ## Running the Project
 1. **In your terminal, change the directory from the root to the server directory by running ```cd server```**

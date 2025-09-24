@@ -27,7 +27,7 @@ main {
     align-self: center;
     justify-self: center;
     margin: 5px;
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
 
 .top-coin-info:hover {
@@ -149,4 +149,8 @@ main {
 .page-change-items {
     align-self: center;
     justify-self: center;
+}
+
+#search-header {
+    text-align: center;
 }
