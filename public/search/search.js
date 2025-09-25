@@ -1,540 +1,265 @@
-const express = require('express');
-const cors = require('cors');
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
-const path = require('path');
-const { spawn } = require('child_process');
-require('dotenv').config({ path: path.join(__dirname, '../.env') });
+import { redirectToHomepage } from "/global/homepageRedirect.js";
+import { redirectToSearch } from "/global/searchbar.js";
+import { colorCoinChange } from "/global/coinColorChange.js";
+import { checkForAPIKey } from "/global/checkForApiKey.js";
+import { fetchAPIKey } from "/global/checkForApiKey.js";
 
-const app = express();
+let searchedCoin;
+let currentPage;
+let totalNumberOfPages;
 
-// Get run mode from env file
-const runMode = process.env.RUN_MODE || 'local';
-
-let API_KEY;
-
-if (runMode === 'local') {
-    API_KEY = process.env.RUGPLAY_API_KEY;
-    console.log('Loaded API Key:', API_KEY || 'No API key found');
-} else {
-    console.log('Running on deployed mode, not fetching API key from env.');
+function checkForEmptyParams() {
+    const searchParams = retrieveSearchParams();
+    if (searchParams === null) {
+        console.log('No parameters found in URL, reverting to default search layout.');
+    } else {
+        return;
+    }
 }
 
-// Use environment variable for port, or default to 3000
-const PORT = process.env.PORT || 3000;
+function retrieveSearchParams() {
+    let paramsToReturn = {};
+    const urlParams = new URLSearchParams(window.location.search);
+    for (const [key, value] of urlParams.entries()) {
+        paramsToReturn[key] = value;
+    }
+    
+    if (Object.keys(paramsToReturn).length > 0) {
+        return paramsToReturn;
+    } else {
+        return null;
+    }
+}
 
-app.use(cors());
-app.use(express.static(path.join(__dirname, '../public')));
-console.log('Serving static files from:', path.join(__dirname, '../public'));
-app.use(express.json({ limit: '50mb' }));
-
-console.log('Run mode:', runMode);
-
-app.get('/', (req, res) => {
-    res.redirect('/homepage/homepage.html');
-});
-
-app.use('/homepage', express.static(path.join(__dirname, '../public/homepage')));
-app.use('/coinpage', express.static(path.join(__dirname, '../public/coinpage')));
-app.use('/search', express.static(path.join(__dirname, '../public/search')));
-app.use('/assets', express.static(path.join(__dirname, '../public/assets')));
-app.use('/global', express.static(path.join(__dirname, '../public/global')));
-
-async function fetchWithHeaders(url, apiKey) {
-    const headers = {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json, text/plain, */*',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Connection': 'keep-alive',
-        'Referer': 'https://rugplay.com/'
+async function retrieveSearchResults() {
+    const defaultParams = {
+        search: '',
+        sortBy: 'marketCap',
+        sortOrder: 'desc',
+        priceFilter: 'all',
+        changeFilter: 'all',
+        page: 1,
+        limit: 12,
+        apikey: fetchAPIKey()
     };
+    
+    const urlParams = retrieveSearchParams();
+    
+    // Create an object to hold only the allowed parameters
+    const finalParams = {};
+    const allowedKeys = Object.keys(defaultParams);
 
-    const res = await fetch(url, { method: 'GET', headers, timeout: 15000 });
-    return res;
+    // If there are parameters from the URL, process them
+    if (urlParams) {
+        for (const key of allowedKeys) {
+            if (urlParams.hasOwnProperty(key)) {
+                finalParams[key] = urlParams[key];
+            } else {
+                finalParams[key] = defaultParams[key];
+            }
+        }
+    } else {
+        // If no parameters in URL, just use all defaults
+        Object.assign(finalParams, defaultParams);
+    }
+    
+    console.log('Final parameters to retrieve:', finalParams);
+
+    // Construct the query string
+    const queryString = new URLSearchParams(finalParams).toString();
+    const apiUrl = `/api/market-data?${queryString}`; // The API endpoint URL
+
+    try {
+        // Fetch the response
+        const response = await fetch(apiUrl);
+
+        // Check if the request was successful
+        if (!response.ok) {
+            // If not, throw an error with the status text
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        // Parse the JSON response
+        const data = await response.json();
+        console.log('Fetched data:', data);
+        return data;
+    } catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+    }
 }
 
-if (runMode === 'local') {
-    console.log('Running local methods.');
-    app.get('/api/top-coins', async (req, res) => {
-        try {
-            const response = await fetch('https://rugplay.com/api/v1/top', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${API_KEY}`,
-                    'Content-Type': 'application/json'
-                },
-            });
+async function displaySearchResults() {
+    const data = await retrieveSearchResults();
+    const coins = data.coins;
+    const searchResultsContainer = document.getElementById('search-results-div');
 
-            console.log('External API response status:', response.status);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('API Error:', errorText);
-                return res.status(response.status).json({ 
-                    error: 'Failed to fetch data from external API.',
-                    details: errorText 
-                });
+    console.log('Recieved coins:');
+    if (Object.keys(coins).length > 0) {
+        // Assign the current page and total pages
+        currentPage = data.page;
+        totalNumberOfPages = data.totalPages;
+        for (let coin of coins) {
+            console.log(coin);
+            const coinInfoContainer = document.createElement('button'); // Main element
+            coinInfoContainer.id = `coin-${coin.symbol}-container`;
+            coinInfoContainer.classList.add('top-coin-info');
+            coinInfoContainer.dataset.symbol = coin.symbol;
+            const coinIconAndChange = document.createElement('div'); // Element to hold icon and 24h change together
+            coinIconAndChange.classList.add('coin-icon-change');
+            // Check if icon exists else use a div with text placeholder
+            if (coin.icon !== null) {
+                const coinIcon = document.createElement('img');
+                coinIcon.src = `https://rugplay.com/api/proxy/s3/${coin.icon}`;
+                coinIcon.classList.add('coin-icon-img');
+                coinIcon.draggable = false;
+                coinIconAndChange.appendChild(coinIcon);
+            } else {
+                const coinIconPlaceholder = document.createElement('div');
+                coinIconPlaceholder.classList.add('coin-icon-div');
+                coinIconPlaceholder.draggable = false;
+                coinIconPlaceholder.innerHTML = `<p>${coin.symbol}</p>`;
+                coinIconAndChange.appendChild(coinIconPlaceholder);
             }
+            const coinChange = document.createElement('p'); // Coin 24h change
+            coinChange.id = `${coin.symbol}-change-24h`;
+            coinChange.classList.add('coin-change');
+            if (coin.change24h >= 0) {
+                coin.change24h = `+${coin.change24h}`;
+            }
+            coinChange.textContent = `${coin.change24h}%`;
+            coinIconAndChange.appendChild(coinChange);
+            coinInfoContainer.appendChild(coinIconAndChange);
+            const coinHeader = document.createElement('h4'); // Coin name and symbol
+            coinHeader.textContent = `${coin.name} (*${coin.symbol})`;
+            coinInfoContainer.appendChild(coinHeader);
+            const coinPrice = document.createElement('h2');
+            coinPrice.textContent = `$${coin.currentPrice}`;
+            coinInfoContainer.appendChild(coinPrice);
+            const marketCap = document.createElement('p');
+            marketCap.textContent = `Market Cap: $${coin.marketCap}`;
+            coinInfoContainer.appendChild(marketCap);
+            searchResultsContainer.appendChild(coinInfoContainer);
+            colorCoinChange(coinChange.id, coin.change24h);
+        }
 
-            const data = await response.json();
-            console.log('Successfully fetched data:', data);
-            res.json(data);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            res.status(500).json({ error: 'Internal server error.' });
+        // Parent container for navigating between pages
+        const pageChangeContainer = document.createElement('div');
+        pageChangeContainer.id = 'page-change-container';
+        pageChangeContainer.classList.add('page-change-container');
+        // Left chevron arrow
+        const leftArrow = document.createElement('div');
+        leftArrow.id = 'left-arrow';
+        leftArrow.classList.add('nav-arrows', 'page-change-items');
+        leftArrow.innerHTML = `<span class="material-symbols-outlined chevron-item">chevron_left</span>`;
+        pageChangeContainer.appendChild(leftArrow);
+        // Input for navigating between pages
+        const pageInput = document.createElement('input');
+        pageInput.id = 'page-input';
+        pageInput.classList.add('page-input', 'page-change-items');
+        pageInput.value = currentPage;
+        pageChangeContainer.appendChild(pageInput);
+        // Of word
+        const ofWord = document.createElement('p');
+        leftArrow.classList.add('page-change-items');
+        ofWord.textContent = 'of';
+        pageChangeContainer.appendChild(ofWord);
+        // Total number of pages
+        const totalPages = document.createElement('p');
+        leftArrow.classList.add('page-change-items');
+        totalPages.textContent = data.totalPages;
+        pageChangeContainer.appendChild(totalPages);
+        // Right chevron arrow
+        const rightArrow = document.createElement('div');
+        rightArrow.id = 'right-arrow';
+        rightArrow.classList.add('nav-arrows', 'page-change-items');
+        rightArrow.innerHTML = `<span class="material-symbols-outlined chevron-item">chevron_right</span>`;
+        pageChangeContainer.appendChild(rightArrow);
+        searchResultsContainer.appendChild(pageChangeContainer);
+
+        changePage();
+    } else {
+        const errorHeaderElement = document.createElement('h2');
+        errorHeaderElement.textContent = 'No coins found';
+        searchResultsContainer.appendChild(errorHeaderElement);
+        const errorTextElement = document.createElement('p');
+        errorTextElement.textContent = `No coins match your search "${searchedCoin}". Try different keywords or adjust filters.`
+        searchResultsContainer.appendChild(errorTextElement);
+        const removeFiltersButton = document.createElement('button');
+        removeFiltersButton.id = 'remove-filters-button';
+        removeFiltersButton.classList.add('remove-filters-button');
+        removeFiltersButton.textContent = 'Remove all filters';
+        searchResultsContainer.appendChild(removeFiltersButton);
+        removeAllFilters();
+    }
+}
+
+function removeAllFilters() {
+    const removeFiltersButton = document.getElementById('remove-filters-button');
+    removeFiltersButton.addEventListener('click', () => {
+        document.location.href = '/search/search.html';
+    });
+}
+
+function updateSearchItems() {
+    const searchbar = document.getElementById('searchbar');
+    searchbar.value = retrieveSearchParams()?.search || '';
+    searchedCoin = searchbar.value;
+}
+
+function changePage() {
+    const leftArrow = document.getElementById('left-arrow');
+    const rightArrow = document.getElementById('right-arrow');
+    const pageInput = document.getElementById('page-input');
+
+    leftArrow.addEventListener('click', () => {
+        if (currentPage > 1) {
+            document.location.href = `/search/search.html?search=${searchedCoin}&page=${currentPage - 1}`;
         }
     });
 
-    app.get('/api/market-data', async (req, res) => {
-        try {
-            const params = {
-                search: req.query.search,
-                sortBy: req.query.sortBy,
-                sortOrder: req.query.sortOrder,
-                priceFilter: req.query.priceFilter,
-                changeFilter: req.query.changeFilter,
-                page: parseInt(req.query.page) || 1,
-                limit: parseInt(req.query.limit) || 12
-            };
-
-            const url = new URL('https://rugplay.com/api/v1/market');
-
-            url.search = new URLSearchParams(params).toString();
-            
-            console.log('Fetching from URL:', url.toString());
-
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${API_KEY}`,
-                    'Content-Type': 'application/json'
-                },
-            });
-
-            console.log('External API response status:', response.status);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('API Error:', errorText);
-                return res.status(response.status).json({ 
-                    error: 'Failed to fetch data from external API.',
-                    details: errorText 
-                });
-            }
-
-            const data = await response.json();
-            console.log('Successfully fetched data:', data);
-            res.json(data);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            res.status(500).json({ error: 'Internal server error.' });
+    rightArrow.addEventListener('click', () => {
+        if (currentPage < totalNumberOfPages) {
+            document.location.href = `/search/search.html?search=${searchedCoin}&page=${currentPage + 1}`;
         }
     });
 
-    app.get('/api/coin-info', async (req, res) => {
-        try {
-            const params = {
-                timeframe: req.query.timeframe || '1m'
-            };
-
-            const url = new URL(`https://rugplay.com/api/v1/coin/${req.query.symbol}`);
-
-            url.search = new URLSearchParams(params).toString();
-            
-            console.log('Fetching from URL:', url.toString());
-
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${API_KEY}`,
-                    'Content-Type': 'application/json'
-                },
-            });
-
-            console.log('External API response status:', response.status);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('API Error:', errorText);
-                return res.status(response.status).json({ 
-                    error: 'Failed to fetch data from external API.',
-                    details: errorText 
-                });
-            }
-
-            const data = await response.json();
-            console.log('Successfully fetched data:', data);
-            res.json(data);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            res.status(500).json({ error: 'Internal server error.' });
-        }
-    });
-
-    app.get('/api/coin-holders', async (req, res) => {
-        try {
-            const params = {
-                limit: req.query.limit || 50
-            };
-
-            const url = new URL(`https://rugplay.com/api/v1/holders/${req.query.symbol}`);
-
-            url.search = new URLSearchParams(params).toString();
-            
-            console.log('Fetching from URL:', url.toString());
-
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${API_KEY}`,
-                    'Content-Type': 'application/json'
-                },
-            });
-
-            console.log('External API response status:', response.status);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('API Error:', errorText);
-                return res.status(response.status).json({ 
-                    error: 'Failed to fetch data from external API.',
-                    details: errorText 
-                });
-            }
-
-            const data = await response.json();
-            console.log('Successfully fetched data:', data);
-            res.json(data);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            res.status(500).json({ error: 'Internal server error.' });
-        }
-    });
-
-    app.get('/api/hopium-data', async (req, res) => {
-        try {
-            const params = {
-                status: req.query.status || 'ACTIVE',
-                page: req.query.page || 1,
-                limit: req.query.limit || 30
-            };
-
-            const url = new URL('https://rugplay.com/api/v1/hopium');
-
-            url.search = new URLSearchParams(params).toString();
-            
-            console.log('Fetching from URL:', url.toString());
-
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${API_KEY}`,
-                    'Content-Type': 'application/json',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
-                    'Accept': 'application/json, text/plain, */*',
-                    'Accept-Language': 'en-US,en;q=0.9',
-                    'Accept-Encoding': 'gzip, deflate, br',
-                    'Connection': 'keep-alive',
-                    'Pragma': 'no-cache',
-                    'Cache-Control': 'no-cache'
-                },
-            });
-
-            console.log('External API response status:', response.status);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('API Error:', errorText);
-                return res.status(response.status).json({ 
-                    error: 'Failed to fetch data from external API.',
-                    details: errorText 
-                });
-            }
-
-            const data = await response.json();
-            console.log('Successfully fetched data:', data);
-            res.json(data);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            res.status(500).json({ error: 'Internal server error.' });
-        }
-    });
-} else {
-    console.log('Running deployed methods.');
-    app.get('/api/top-coins', async (req, res) => {
-        try {
-            console.log('API key from request query:', req.query.apikey);
-            const response = await fetch('https://rugplay.com/api/v1/top', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${req.query.apikey}`,
-                    'Content-Type': 'application/json',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
-                    'Accept': 'application/json, text/plain, */*',
-                    'Accept-Language': 'en-US,en;q=0.9',
-                    'Accept-Encoding': 'gzip, deflate, br',
-                    'Connection': 'keep-alive',
-                    'Pragma': 'no-cache',
-                    'Cache-Control': 'no-cache'
-                },
-            });
-
-            console.log('External API response status:', response.status);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('API Error:', errorText);
-                return res.status(response.status).json({ 
-                    error: 'Failed to fetch data from external API.',
-                    details: errorText
-                });
-            }
-
-            const data = await response.json();
-            console.log('Successfully fetched data:', data);
-            res.json(data);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            res.status(500).json({ error: 'Internal server error.' });
-        }
-    });
-
-    app.get('/api/market-data', async (req, res) => {
-        try {
-            const params = {
-                search: req.query.search,
-                sortBy: req.query.sortBy,
-                sortOrder: req.query.sortOrder,
-                priceFilter: req.query.priceFilter,
-                changeFilter: req.query.changeFilter,
-                page: parseInt(req.query.page) || 1,
-                limit: parseInt(req.query.limit) || 12
-            };
-
-            const url = new URL('https://rugplay.com/api/v1/market');
-
-            url.search = new URLSearchParams(params).toString();
-            
-            console.log('Fetching from URL:', url.toString());
-
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${req.query.apikey}`,
-                    'Content-Type': 'application/json',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
-                    'Accept': 'application/json, text/plain, */*',
-                    'Accept-Language': 'en-US,en;q=0.9',
-                    'Accept-Encoding': 'gzip, deflate, br',
-                    'Connection': 'keep-alive',
-                    'Pragma': 'no-cache',
-                    'Cache-Control': 'no-cache'
-                },
-            });
-
-            console.log('External API response status:', response.status);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('API Error:', errorText);
-                return res.status(response.status).json({ 
-                    error: 'Failed to fetch data from external API.',
-                    details: errorText 
-                });
-            }
-
-            const data = await response.json();
-            console.log('Successfully fetched data:', data);
-            res.json(data);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            res.status(500).json({ error: 'Internal server error.' });
-        }
-    });
-
-    app.get('/api/coin-info', async (req, res) => {
-        try {
-            const params = {
-                timeframe: req.query.timeframe || '1m'
-            };
-
-            const url = new URL(`https://rugplay.com/api/v1/coin/${req.query.symbol}`);
-
-            url.search = new URLSearchParams(params).toString();
-            
-            console.log('Fetching from URL:', url.toString());
-
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${req.query.apikey}`,
-                    'Content-Type': 'application/json',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
-                    'Accept': 'application/json, text/plain, */*',
-                    'Accept-Language': 'en-US,en;q=0.9',
-                    'Accept-Encoding': 'gzip, deflate, br',
-                    'Connection': 'keep-alive',
-                    'Pragma': 'no-cache',
-                    'Cache-Control': 'no-cache'
-                },
-            });
-
-            console.log('External API response status:', response.status);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('API Error:', errorText);
-                return res.status(response.status).json({ 
-                    error: 'Failed to fetch data from external API.',
-                    details: errorText 
-                });
-            }
-
-            const data = await response.json();
-            console.log('Successfully fetched data:', data);
-            res.json(data);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            res.status(500).json({ error: 'Internal server error.' });
-        }
-    });
-
-    app.get('/api/coin-holders', async (req, res) => {
-        try {
-            const params = {
-                limit: req.query.limit || 50
-            };
-
-            const url = new URL(`https://rugplay.com/api/v1/holders/${req.query.symbol}`);
-
-            url.search = new URLSearchParams(params).toString();
-            
-            console.log('Fetching from URL:', url.toString());
-
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${req.query.apikey}`,
-                    'Content-Type': 'application/json',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
-                    'Accept': 'application/json, text/plain, */*',
-                    'Accept-Language': 'en-US,en;q=0.9',
-                    'Accept-Encoding': 'gzip, deflate, br',
-                    'Connection': 'keep-alive',
-                    'Pragma': 'no-cache',
-                    'Cache-Control': 'no-cache'
-                },
-            });
-
-            console.log('External API response status:', response.status);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('API Error:', errorText);
-                return res.status(response.status).json({ 
-                    error: 'Failed to fetch data from external API.',
-                    details: errorText 
-                });
-            }
-
-            const data = await response.json();
-            console.log('Successfully fetched data:', data);
-            res.json(data);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            res.status(500).json({ error: 'Internal server error.' });
-        }
-    });
-
-    app.get('/api/hopium-data', async (req, res) => {
-        try {
-            const params = {
-                status: req.query.status,
-                page: req.query.page || 1,
-                limit: req.query.limit || 20
-            };
-
-            const url = new URL('https://rugplay.com/api/v1/hopium');
-
-            url.search = new URLSearchParams(params).toString();
-            
-            console.log('Fetching from URL:', url.toString());
-
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${req.query.apikey}`,
-                    'Content-Type': 'application/json',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
-                    'Accept': 'application/json, text/plain, */*',
-                    'Accept-Language': 'en-US,en;q=0.9',
-                    'Accept-Encoding': 'gzip, deflate, br',
-                    'Connection': 'keep-alive',
-                    'Pragma': 'no-cache',
-                    'Cache-Control': 'no-cache'
-                },
-            });
-
-            console.log('External API response status:', response.status);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('API Error:', errorText);
-                return res.status(response.status).json({ 
-                    error: 'Failed to fetch data from external API.',
-                    details: errorText 
-                });
-            }
-
-            const data = await response.json();
-            console.log('Successfully fetched data:', data);
-            res.json(data);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            res.status(500).json({ error: 'Internal server error.' });
+    pageInput.addEventListener('keypress', (event) => {
+        const pageValue = Number(pageInput.value);
+        if (event.key === 'Enter' && Number.isInteger(pageValue) && pageValue > 0 && pageValue <= totalNumberOfPages) {
+            document.location.href = `/search/search.html?search=${searchedCoin}&page=${pageValue}`;
         }
     });
 }
 
-app.post('/api/graph', (req, res) => {
-    console.log('Request body:', req.body);
-    const { coin, candlestickData, volumeData, timeframe } = req.body;
-    const dataToSend = JSON.stringify(req.body);
+function handleCoinClick() {
+    document.addEventListener('click', (e) => {
+        const clickedItem = e.target.closest('.top-coin-info'); // Clicked item - check if it includes the clicked coin item
 
-    const pythonScriptPath = path.join(__dirname, 'graph_generation', 'coingraph_generator.py');
-
-    const pythonProcess = spawn('python', [pythonScriptPath]);
-    pythonProcess.stdin.write(dataToSend);
-    pythonProcess.stdin.end();
-
-    let pythonOutput = '';
-
-    pythonProcess.stdout.on('data', (data) => {
-        pythonOutput += data.toString();
-    });
-
-    pythonProcess.on('close', (code) => {
-        if (code === 0) {
-            try {
-                const graphData = JSON.parse(pythonOutput);
-                console.log('Returning graph data:', graphData);
-                res.json({ success: true, graphData });
-            } catch (e) {
-                console.error("Failed to parse JSON from Python script:", e);
-                res.status(500).json({ success: false, error: 'Failed to process graph data' });
-            }
-        } else {
-            console.error(`Python script exited with code ${code}`);
-            res.status(500).json({ success: false, error: 'Graph generation failed' });
+        // Check if the coin item was actually clicked
+        if (clickedItem) {
+            console.log('ID of coin item clicked on:', clickedItem.id);
+            const coinSymbol = clickedItem.dataset.symbol;
+            console.log('Symbol of clicked coin:', coinSymbol);
+            document.location.href = `/coinpage/coinpage.html?symbol=${coinSymbol}`;
         }
     });
+}
 
-    pythonProcess.stderr.on('data', (data) => {
-        console.error(`stderr: ${data}`);
-    });
-});
+function updateSearchPage() {
+    document.title = `${searchedCoin} - Search - RugplayLite`;
+    const searchTitle = document.getElementById('search-header');
+    searchTitle.textContent = `Search Results for '${searchedCoin}'`;
+}
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+async function initializePage() {
+    checkForAPIKey();
+    checkForEmptyParams();
+    updateSearchItems();
+    await displaySearchResults();
+    handleCoinClick();
+    redirectToSearch('searchbar');
+    redirectToHomepage('header-logo');
+    updateSearchPage();
+}
+
+document.addEventListener('DOMContentLoaded', initializePage);
